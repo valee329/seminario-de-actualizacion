@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -69,12 +70,6 @@ function authenticateUser( username, password )
 	if ( (username != undefined && username != null && username != '') && (password != undefined && password != null && password != '') )
 	{
 		let userdata = isValidUserGetData(username);
-		
-		if (!userdata) {
-			api_return.status = false;
-			api_return.result = 'USER_NOT_FOUND';
-			return api_return;
-		}
 
 		if ( userdata.isLocked == false )
 		{
@@ -108,6 +103,8 @@ function authenticateUser( username, password )
 	return api_return;
 }
 
+
+
 //FRONTEND---------------------
 
 function GUI_login()
@@ -129,8 +126,8 @@ function GUI_login()
 				alert('Usuario bloqueado. Contacte al administrador');
 			break;
 
-			case 'USER_NOT_FOUND':
-			alert('Usuario no registrado');
+			case 'USER_PASSWORD_FAILED':
+				alert('Usuario y/o contraseña incorrecta');
 			break;
 
 			default:
@@ -141,6 +138,7 @@ function GUI_login()
 
 	return api_return;
 }
+
 
 function main()
 {
@@ -160,6 +158,27 @@ function main()
 
 window.onload = main;
 
+
+/*function main()
+{
+	let attempts = 0;
+	let api_return = GUI_login();
+	
+	if(attempts < maxLoginFailedAttempts){
+	while( api_return.result == 'USER_PASSWORD_FAILED' )
+	{
+		api_return = GUI_login();
+
+		if ( api_return.result == 'USER_PASSWORD_FAILED' )
+		{
+			attempts++;
+		}
+	}
+	}else{
+		alert(`¡Bienvenido/a ${username}!`);
+		GUI_menu(username)
+	}
+*/
 
 </script>
 

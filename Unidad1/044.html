@@ -1,0 +1,322 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8" />
+<title>Unidad 1</title>
+</head>
+
+<body>
+
+</body>
+
+<script type="text/javascript">
+	
+/*Un sistema de venta de productos de limpieza al por mayor le ofrece a sus clientes minoristas una
+aplicación de consola para poder gestionar sus pedidos a la casa central. Los clientes se identifican con
+un usuario y contraseña. El programa al iniciarse, pide estas credenciales de acceso, las corrobora y en
+caso de ser correctas mostrará un mensaje de bienvenida “¡Bienvenido/a nombre-de-usuario!” Caso
+contrario, mostrará un mensaje de error “Usuario y/o contraseña incorrecta”. Al tercer intento incorrecto de
+acceso, el usuario deberá ser bloqueado y el mensaje deberá ser “Usuario bloqueado. Contacte al
+administrador”.*/
+
+//k-v (key: username, value: password)
+
+
+class APIModelAccess
+{
+	constructor()
+	{
+		this.authData = new Map();
+		this.maxLoginFailedAttempts = 3;
+
+		let userData =                  //esta estructura esta dentro de authData, no es necesario agregarlo como miembro de la clase (this.)
+		[
+		{
+			password: '987654',
+			failedLoginCounter: 0,
+			isLocked: false
+		},
+		{
+			password: '987654',
+			failedLoginCounter: 0,
+			isLocked: false
+		}	
+		]
+
+		this._authData.set('scorpion', userData[0] );
+		this._authData.set('subZero', userData[1] );
+
+	}
+
+	
+	isValidUserGetData( username )              //esta funcion pasa a ser metodo de la clase
+	{
+		return this._authData.get(username);
+	}
+
+	
+	authenticateUser( username, password )
+	{
+		let api_return = 
+		{
+			status: false,
+			result: null
+		};
+
+
+		if ( (username != undefined && username != null && username != '') && (password != undefined && password != null && password != '') )
+		{
+			let userdata = this.isValidUserGetData(username);
+			
+			if (!userdata) {
+				api_return.status = false;
+				api_return.result = 'USER_NOT_FOUND';
+				return api_return;
+			}
+
+			if ( userdata.isLocked == false )
+			{
+				if( userdata.password === password )
+				{
+					api_return.status = true;
+				}
+				else
+				{
+					api_return.status = false;
+					api_return.result = 'USER_PASSWORD_FAILED';
+
+					userdata.failedLoginCounter++;
+					
+					if ( userdata.failedLoginCounter == this._maxLoginFailedAttempts )
+					{
+						userdata.isLocked = true;
+						api_return.status = false;
+						api_return.result = 'BLOCKED_USER';
+					}
+				}
+			}
+			else
+			{
+				api_return.status = false;
+				api_return.result = 'BLOCKED_USER';
+			}
+			
+		}
+		
+		return api_return;
+	}
+
+	}
+
+
+//Si el estado del caso de uso, SIEMPRE comprende dos estados se podría retornar un BOOLEAN en el método de la API
+//Si no se puede garantizar que esto sea así, JAMAS definir un BOOLEAN como tipo de retorno en una método de API.
+//Generalmente se retorna un objeto que tiene estado/descripción||result:
+/*
+{
+	status: OK | FAIL | EXCEPTION
+	result: Si OK -> return value, Si es FAIL/EXCEPTION -> string (descripción del error o ID de error)
+}
+
+*/
+
+
+function accessMenu(option, username){
+    switch(option){
+        case '1': 
+            GUI_changePassword(username);
+        break;
+
+        case '2':
+            exit();
+        break;
+
+        default:
+            alert ('Opcion Incorrecta')
+        break;
+    }
+}
+
+function changePassword(username){
+    let newPassword;
+    if( newPassword && newPassword.trim() !== "")
+    {
+        let updateUser = authData.get(username);
+        updateUser.password = newPassword;
+       
+    }
+}
+
+function passwordRequirements(newPassword) {
+    let result = {
+        valid: true,
+        errors: []
+    };
+
+    if (newPassword.length < 8 || newPassword.length > 16) {
+        result.valid = false;
+        result.errors.push("LONGITUD_INVALIDA");
+    }
+
+    let capital = false;
+    let symbolCount = 0;
+
+    for (let c of newPassword) {
+        if (/[A-Z]/.test(c)) capital = true;
+        if (/[^a-zA-Z0-9]/.test(c)) symbolCount++;
+    }
+
+    if (!capital) {
+        result.valid = false;
+        result.errors.push("FALTA_MAYUSCULA");
+    }
+
+    if (symbolCount < 2) {
+        result.valid = false;
+        result.errors.push("FALTAN_SIMBOLOS");
+    }
+
+    return result;
+}
+
+
+ /*   if (isAlphanumeric && capital == true && simbolos >= 2) {
+    GUI_passwordRequirements();
+    }
+ */
+
+
+function exit (){
+	main();
+}
+
+//FRONTEND---------------------
+
+function GUI_login()
+{
+	let username = window.prompt("Ingrese su nombre de usuario:");
+	let password = window.prompt("Ingrese contraseña:");
+
+	let api_return = authenticateUser( username, password );
+	
+	if ( api_return.status )
+	{
+		alert('Usuario autenticado exitosamente');
+	}
+	else if ( api_return.status == false )
+	{
+		switch ( api_return.result ) 
+		{
+			case 'BLOCKED_USER':
+				alert('Usuario bloqueado. Contacte al administrador');
+			break;
+
+			case 'USER_NOT_FOUND':
+			alert('Usuario no registrado');
+			break;
+
+			default:
+				alert('Error desconocido');
+			break;
+		}
+	}
+
+	return api_return;
+}
+
+//Alt+96 comillas invertidas
+
+function GUI_menu(username) {
+	let option = prompt (`Bienevenido ${username}. \nSeleccione una opción:\n1. Cambiar contraseña\n2. Salir`);
+	accessMenu(option, username);
+}
+
+function GUI_changePassword(username) {
+    alert("La contraseña debe cumplir los siguientes requisitos:\n- Entre 8 y 16 caracteres\n- Al menos una mayúscula\n- Al menos dos símbolos especiales (espacios incluidos)");
+
+    let newPassword = prompt("Ingrese nueva contraseña:");
+
+  /*  if (!newPassword || newPassword.trim() === "") {
+        alert("Debe ingresar una contraseña.");
+        return; 
+    }*/
+
+    let validation = passwordRequirements(newPassword);
+
+    if (validation.valid) {
+        changePassword(username, newPassword);
+        alert("Contraseña actualizada correctamente.");
+    } else {
+        let message = "Contraseña inválida:\n";
+
+        for (let error of validation.errors) {
+            switch (error) {
+                case "LONGITUD_INVALIDA":
+                    message += "- La contraseña debe tener entre 8 y 16 caracteres.\n";
+                    break;
+                case "FALTA_MAYUSCULA":
+                    message += "- Debe contener al menos una letra mayúscula.\n";
+                    break;
+                case "FALTAN_SIMBOLOS":
+                    message += "- Debe contener al menos dos símbolos especiales.\n";
+                    break;
+            }
+        }
+
+        alert(message);
+        
+        GUI_changePassword(username);
+    }
+}
+
+
+function main()
+{
+	let attempts = 0;
+	let api_return;
+	let username;
+
+	do {
+		username = window.prompt("Ingrese su nombre de usuario:");
+		let password = window.prompt("Ingrese contraseña:");
+
+		api_return = authenticateUser(username, password);
+
+		if (api_return.status)
+		{
+			GUI_menu(username); 
+			break; 
+
+		} else {
+			switch (api_return.result) {
+				case 'USER_PASSWORD_FAILED':
+					alert('Usuario y/o contraseña incorrecta');
+					attempts++;
+					break;
+
+				case 'BLOCKED_USER':
+					alert('Usuario bloqueado. Contacte al administrador');
+					attempts = maxLoginFailedAttempts;
+					break;
+
+				case 'USER_NOT_FOUND':
+					alert('Usuario no registrado');
+					break;
+
+				default:
+					alert('Error desconocido');
+			}
+		}
+
+	} while (attempts < maxLoginFailedAttempts);
+}
+
+
+window.onload = main;
+
+
+</script>
+
+</html>

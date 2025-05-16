@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -135,29 +136,37 @@ function changePassword(username){
 }
 
 function passwordRequirements(newPassword) {
-    if (newPassword.length < 8 || newPassword.length > 16) {
-        return false;
-    }
+    let result = {
+        valid: true,
+        errors: []
+    };
 
-    let cadena = newPassword.split("");
+    if (newPassword.length < 8 || newPassword.length > 16) {
+        result.valid = false;
+        result.errors.push("LONGITUD_INVALIDA");
+    }
 
     let capital = false;
     let symbolCount = 0;
 
-    for (let i = 0; i < cadena.length; i++) {
-        let c = cadena[i];
-
-        if (/[A-Z]/.test(c)) {
-            capital = true;
-        }
-
-        if (/[^a-zA-Z0-9]/.test(c)) {
-            symbolCount++;
-        }
+    for (let c of newPassword) {
+        if (/[A-Z]/.test(c)) capital = true;
+        if (/[^a-zA-Z0-9]/.test(c)) symbolCount++;
     }
 
-    return capital && symbolCount >= 2;
+    if (!capital) {
+        result.valid = false;
+        result.errors.push("FALTA_MAYUSCULA");
+    }
+
+    if (symbolCount < 2) {
+        result.valid = false;
+        result.errors.push("FALTAN_SIMBOLOS");
+    }
+
+    return result;
 }
+
 
  /*   if (isAlphanumeric && capital == true && simbolos >= 2) {
     GUI_passwordRequirements();
@@ -210,18 +219,42 @@ function GUI_menu(username) {
 	accessMenu(option, username);
 }
 
-function GUI_changePassword(username){
-    alert ("La contraseña debera tener los requisitos de seguridad descriptos a continuación: \n Entre 8 y 16 caracteres alfanuméricos\n- Al menos una mayúscula\n- Y al menos dos símbolos especiales \n(los espacios cuentan como simbolos especiales)\n")
-	let newPassword = prompt ("Ingrese nueva contraseña:");
+function GUI_changePassword(username) {
+    alert("La contraseña debe cumplir los siguientes requisitos:\n- Entre 8 y 16 caracteres\n- Al menos una mayúscula\n- Al menos dos símbolos especiales (espacios incluidos)");
 
-    if (passwordRequirements(newPassword)) {
-        (username, newPassword);
-	    alert ("Contraseña actualizada correctamente");
+    let newPassword = prompt("Ingrese nueva contraseña:");
+
+  /*  if (!newPassword || newPassword.trim() === "") {
+        alert("Debe ingresar una contraseña.");
+        return; 
+    }*/
+
+    let validation = passwordRequirements(newPassword);
+
+    if (validation.valid) {
+        changePassword(username, newPassword);
+        alert("Contraseña actualizada correctamente.");
+    } else {
+        let message = "Contraseña inválida:\n";
+
+        for (let error of validation.errors) {
+            switch (error) {
+                case "LONGITUD_INVALIDA":
+                    message += "- La contraseña debe tener entre 8 y 16 caracteres.\n";
+                    break;
+                case "FALTA_MAYUSCULA":
+                    message += "- Debe contener al menos una letra mayúscula.\n";
+                    break;
+                case "FALTAN_SIMBOLOS":
+                    message += "- Debe contener al menos dos símbolos especiales.\n";
+                    break;
+            }
+        }
+
+        alert(message);
+        
+        GUI_changePassword(username);
     }
-    else{
-        alert("Contraseña inválida.\nLa contraseña debe tener:\n Entre 8 y 16 caracteres alfanuméricos\n- Al menos una mayúscula\n- Y al menos dos símbolos especiales \n(los espacios cuentan como simbolos especiales)\n");
-    }
-    
 }
 
 
