@@ -12,16 +12,8 @@
 </body>
 
 <script type="text/javascript">
-	
-/*Un sistema de venta de productos de limpieza al por mayor le ofrece a sus clientes minoristas una
-aplicación de consola para poder gestionar sus pedidos a la casa central. Los clientes se identifican con
-un usuario y contraseña. El programa al iniciarse, pide estas credenciales de acceso, las corrobora y en
-caso de ser correctas mostrará un mensaje de bienvenida “¡Bienvenido/a nombre-de-usuario!” Caso
-contrario, mostrará un mensaje de error “Usuario y/o contraseña incorrecta”. Al tercer intento incorrecto de
-acceso, el usuario deberá ser bloqueado y el mensaje deberá ser “Usuario bloqueado. Contacte al
-administrador”.*/
-
 //k-v (key: username, value: password)
+
 let authData = new Map();
 const maxLoginFailedAttempts = 3;
 
@@ -41,6 +33,74 @@ let userData =
 
 authData.set('scorpion', userData[0] );
 authData.set('subZero', userData[1] );
+
+
+function processLogin()
+{
+	let attempts = 0;
+	let api_return;
+	let username;
+
+	do {
+		username = window.prompt("Ingrese su nombre de usuario:");
+		let password = window.prompt("Ingrese contraseña:");
+
+		api_return = authenticateUser(username, password);
+
+		if (api_return.status) {
+			GUI_menu(username);
+			break;
+		} else {
+			switch (api_return.result) {
+				case 'USER_PASSWORD_FAILED':
+					alert('Usuario y/o contraseña incorrecta');
+					attempts++;
+					break;
+
+				case 'BLOCKED_USER':
+					alert('Usuario bloqueado. Contacte al administrador');
+					attempts = maxLoginFailedAttempts;
+					break;
+
+				case 'USER_NOT_FOUND':
+					alert('Usuario no registrado');
+					break;
+
+				default:
+					alert('Error desconocido');
+			}
+		}
+	} while (attempts < maxLoginFailedAttempts);
+}
+
+function registerUser(username, password) 
+{
+	if (authData.has(username)) {
+		return {
+			status: false,
+			result: "USERNAME_EXISTS"
+		};
+	}
+
+	let validation = passwordRequirements(password);
+	if (!validation.valid) {
+		return {
+			status: false,
+			result: validation.errors
+		};
+	}
+
+	authData.set(username, {
+		password: password,
+		failedLoginCounter: 0,
+		isLocked: false
+	});
+
+	return {
+		status: true
+	};
+}
+
 
 function isValidUserGetData( username )
 {
@@ -109,7 +169,8 @@ function authenticateUser( username, password )
 	return api_return;
 }
 
-function accessMenu(option, username){
+function accessMenu(option, username)
+{
     switch(option){
         case '1': 
             GUI_changePassword(username);
@@ -135,7 +196,8 @@ function changePassword(username){
     }
 }
 
-function passwordRequirements(newPassword) {
+function passwordRequirements(newPassword)
+{
     let result = {
         valid: true,
         errors: []
@@ -180,6 +242,26 @@ function exit (){
 
 //FRONTEND---------------------
 
+function GUI_mainMenu()
+{
+
+		let option = prompt("Menú principal:\n1. Iniciar sesión\n2. Crear cuenta de usuario");
+		switch (option) {
+			case '1':
+				processLogin();
+                main();
+				break;
+			case '2':
+				GUI_register();
+                main();
+				break;
+
+			default:
+				alert("Opción no válida. Intente de nuevo.");
+                main();
+		}
+	}
+
 function GUI_login()
 {
 	let username = window.prompt("Ingrese su nombre de usuario:");
@@ -212,54 +294,74 @@ function GUI_login()
 	return api_return;
 }
 
+function GUI_register() 
+{
+	let username = prompt("Ingrese un nombre de usuario nuevo:");
+	if (!username || username.trim() === "") {
+		alert("Nombre de usuario inválido.");
+		return;
+	}
+
+	let password = prompt("Ingrese una contraseña para el nuevo usuario:");
+	let result = registerUser(username, password);
+
+	if (!result.status) {
+		if (result.result === "USERNAME_EXISTS") {
+			alert("El nombre de usuario ya existe.");
+		} else {
+			GUI_passwordRequirement(result.result); 
+		}
+		return;
+	}
+
+	alert("Cuenta creada exitosamente.");
+}
+
+function GUI_passwordRequirement(errors) {
+	for (let error of errors) {
+		switch (error) {
+			case "LONGITUD_INVALIDA":
+				alert("- La contraseña debe tener entre 8 y 16 caracteres.");
+				break;
+			case "FALTA_MAYUSCULA":
+				alert("- Debe contener al menos una letra mayúscula.");
+				break;
+			case "FALTAN_SIMBOLOS":
+				alert("- Debe contener al menos dos símbolos especiales.");
+				break;
+		}
+	}
+}
+
+
+function GUI_changePassword(username) 
+{
+	alert("La contraseña debe cumplir los siguientes requisitos:\n- Entre 8 y 16 caracteres\n- Al menos una mayúscula\n- Al menos dos símbolos especiales (espacios incluidos)");
+
+	let newPassword = prompt("Ingrese nueva contraseña:");
+	let validation = passwordRequirements(newPassword);
+
+	if (validation.valid) {
+		changePassword(username, newPassword);
+		alert("Contraseña actualizada correctamente.");
+	} else {
+		GUI_passwordRequirement(validation.errors);
+		GUI_changePassword(username); 
+	}
+}
+
 //Alt+96 comillas invertidas
 
-function GUI_menu(username) {
-	let option = prompt (`Bienevenido ${username}. \nSeleccione una opción:\n1. Cambiar contraseña\n2. Salir`);
+function GUI_menu(username)
+{
+	let option = prompt (`Bienvenido ${username}. \nSeleccione una opción:\n1. Cambiar contraseña\n2. Salir`);
 	accessMenu(option, username);
 }
 
-function GUI_changePassword(username) {
-    alert("La contraseña debe cumplir los siguientes requisitos:\n- Entre 8 y 16 caracteres\n- Al menos una mayúscula\n- Al menos dos símbolos especiales (espacios incluidos)");
-
-    let newPassword = prompt("Ingrese nueva contraseña:");
-
-  /*  if (!newPassword || newPassword.trim() === "") {
-        alert("Debe ingresar una contraseña.");
-        return; 
-    }*/
-
-    let validation = passwordRequirements(newPassword);
-
-    if (validation.valid) {
-        changePassword(username, newPassword);
-        alert("Contraseña actualizada correctamente.");
-    } else {
-        let message = "Contraseña inválida:\n";
-
-        for (let error of validation.errors) {
-            switch (error) {
-                case "LONGITUD_INVALIDA":
-                    message += "- La contraseña debe tener entre 8 y 16 caracteres.\n";
-                    break;
-                case "FALTA_MAYUSCULA":
-                    message += "- Debe contener al menos una letra mayúscula.\n";
-                    break;
-                case "FALTAN_SIMBOLOS":
-                    message += "- Debe contener al menos dos símbolos especiales.\n";
-                    break;
-            }
-        }
-
-        alert(message);
-        
-        GUI_changePassword(username);
-    }
-}
-
-
 function main()
 {
+    GUI_mainMenu();
+    
 	let attempts = 0;
 	let api_return;
 	let username;

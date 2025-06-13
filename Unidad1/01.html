@@ -21,30 +21,100 @@ acceso, el usuario deberá ser bloqueado y el mensaje deberá ser “Usuario blo
 administrador”.*/
 
 //k-v (key: username, value: password)
-let authData = new Map();
-const maxLoginFailedAttempts = 3;
 
-let userData =
-[
-	{
-		password: '987654',
-		failedLoginCounter: 0,
-		isLocked: false
-	},
-	{
-		password: '987654',
-		failedLoginCounter: 0,
-		isLocked: false
-	}
-]
-
-authData.set('scorpion', userData[0] );
-authData.set('subZero', userData[1] );
-
-function isValidUserGetData( username )
+class APIModelAccess
 {
-	return authData.get(username);
+	constructor()                          //'todo lo que este dentro el constructor vienen a ser como atributos privados'
+	{
+		this.authData = new Map();
+		this.maxLoginFailedAttempts = 3;
+
+		let userData =                  //esta estructura esta dentro de authData, no es necesario agregarlo como miembro de la clase (this.)
+		[
+		{
+			password: '987654',
+			failedLoginCounter: 0,
+			isLocked: false
+		},
+		{
+			password: '987654',
+			failedLoginCounter: 0,
+			isLocked: false
+		}	
+		]
+
+		this._authData.set('scorpion', userData[0] );
+		this._authData.set('subZero', userData[1] );
+
+	}
+
+	
+	isValidUserGetData( username )              //esta funcion pasa a ser metodo de la clase
+	{
+		return this._authData.get(username);
+	}
+
+	
+	authenticateUser( username, password )
+	{
+		let api_return = 
+		{
+			status: false,
+			result: null
+		};
+
+
+		if ( (username != undefined && username != null && username != '') && (password != undefined && password != null && password != '') )
+		{
+			let userdata = this.isValidUserGetData(username);
+			
+			if (!userdata) {
+				api_return.status = false;
+				api_return.result = 'USER_NOT_FOUND';
+				return api_return;
+			}
+
+			if ( userdata.isLocked == false )
+			{
+				if( userdata.password === password )
+				{
+					api_return.status = true;
+				}
+				else
+				{
+					api_return.status = false;
+					api_return.result = 'USER_PASSWORD_FAILED';
+
+					userdata.failedLoginCounter++;
+					
+					if ( userdata.failedLoginCounter == this._maxLoginFailedAttempts )
+					{
+						userdata.isLocked = true;
+						api_return.status = false;
+						api_return.result = 'BLOCKED_USER';
+					}
+				}
+			}
+			else
+			{
+				api_return.status = false;
+				api_return.result = 'BLOCKED_USER';
+			}
+			
+		}
+		
+		return api_return;
+	}
+
+	getMaxLoginAttempts()                         //creo este metodo para poder usar este atributo (maxLoginFailedAttempts) en el ambito publico, es decir llamarlo fuera de la clase
+	{
+		return this._maxLoginFailedAttempts;
+	}
 }
+
+
+
+
 
 //Si el estado del caso de uso, SIEMPRE comprende dos estados se podría retornar un BOOLEAN en el método de la API
 //Si no se puede garantizar que esto sea así, JAMAS definir un BOOLEAN como tipo de retorno en una método de API.
@@ -57,105 +127,85 @@ function isValidUserGetData( username )
 
 */
 
-function authenticateUser( username, password )
+class LoginApplicationView
 {
-	let api_return = 
+	constructor(apiInstanceObject)
 	{
-		status: false,
-		result: null
-	};
-
-
-	if ( (username != undefined && username != null && username != '') && (password != undefined && password != null && password != '') )
+		this._api = apiInstanceObject;                                //y la guardo aca , a traves del atributo (this._api). entonces ahora si  puedo usar los metodos de la clase APIModelAccess fuera de la clase llamandolo por medio de la instancia (this._api)
+	}
+	show()
 	{
-		let userdata = isValidUserGetData(username);
+		let username = window.prompt("Ingrese su nombre de usuario:");
+		let password = window.prompt("Ingrese contraseña:");
+
+		let api_return = this._api.authenticateUser( username, password );
 		
-		if (!userdata) {
-			api_return.status = false;
-			api_return.result = 'USER_NOT_FOUND';
-			return api_return;
-		}
-
-		if ( userdata.isLocked == false )
+		if ( api_return.status )
 		{
-			if( userdata.password === password )
+			alert('Usuario autenticado exitosamente');
+		}
+		else if ( api_return.status == false )
+		{
+			switch ( api_return.result ) 
 			{
-				api_return.status = true;
-			}
-			else
-			{
-				api_return.status = false;
-				api_return.result = 'USER_PASSWORD_FAILED';
+				case 'BLOCKED_USER':
+					alert('Usuario bloqueado. Contacte al administrador');
+				break;
 
-				userdata.failedLoginCounter++;
-				
-				if ( userdata.failedLoginCounter == maxLoginFailedAttempts )
-				{
-					userdata.isLocked = true;
-					api_return.status = false;
-					api_return.result = 'BLOCKED_USER';
-				}
+				case 'USER_NOT_FOUND':
+				alert('Usuario no registrado');
+				break;
+
+				default:
+					alert('Error desconocido');
+				break;
 			}
 		}
-		else
-		{
-			api_return.status = false;
-			api_return.result = 'BLOCKED_USER';
-		}
-		
+
+		return api_return;
 	}
-	
-	return api_return;
 }
 
-//FRONTEND---------------------
 
-function GUI_login()
+class Application
 {
-	let username = window.prompt("Ingrese su nombre de usuario:");
-	let password = window.prompt("Ingrese contraseña:");
-
-	let api_return = authenticateUser( username, password );
-	
-	if ( api_return.status )
+	constructor(apiInstance)                                          //aca le estoy pasando por parametro la instancia del acceso a la API
 	{
-		alert('Usuario autenticado exitosamente');
+		this._api = apiInstanceObject;
+		this.defaulView = new LoginApplicationView(this._api);
+		this._getMaxLoginAttempts = this._api.getMaxLoginAttempts();       //aca estoy consultandole a la API hasta cuantas veces se puede iniciar seccion y lo guardo en (this._maxLoginFailedAttempts)
+		this._attempts = 0;
+		this._api_return = null;
 	}
-	else if ( api_return.status == false )
+
+	init()
 	{
-		switch ( api_return.result ) 
+		this._api_return = this.defaulView.show();
+	}
+
+	run()                                             //con el metodo run se despliega la vista de la aplicacion, 
+	{
+		while( this._api_return.result == 'USER_PASSWORD_FAILED' && attempts < maxLoginFailedAttempts )        //depende lo que devuelva va a seguir  mostrando
 		{
-			case 'BLOCKED_USER':
-				alert('Usuario bloqueado. Contacte al administrador');
-			break;
+			this._api_return = this.defaultView.show();
 
-			case 'USER_NOT_FOUND':
-			alert('Usuario no registrado');
-			break;
-
-			default:
-				alert('Error desconocido');
-			break;
+			if ( this._api_return.result == 'USER_PASSWORD_FAILED' )
+			{
+				this._attempts++;
+			}
 		}
 	}
-
-	return api_return;
 }
+
+
 
 function main()
 {
-	let attempts = 0;
-	let api_return = GUI_login();
-	
-	while( api_return.result == 'USER_PASSWORD_FAILED' && attempts < maxLoginFailedAttempts )
-	{
-		api_return = GUI_login();
+	let model = new APIModelAccess();
+	let app = Application(model)           //le pasamos el acceso a la API por agregacion al frontend para que pueda tener acceso
 
-		if ( api_return.result == 'USER_PASSWORD_FAILED' )
-		{
-			attempts++;
-		}
-	}
+	app.init();
+	app.run();
 }
 
 window.onload = main;
