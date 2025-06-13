@@ -141,14 +141,18 @@ class APIModelAccess
 
 	changePassword(username, newPassword)
 	{
-		let newPassword;
-		if( newPassword && newPassword.trim() !== "")
-		{
-			let updateUser = this._authData.get(username);
+		if (newPassword && newPassword.trim() !== "") {
+			const updateUser = this._authData.get(username);
+			if (!updateUser) {
+				console.error("El usuario no existe.");
+				return false;
+			}
 			updateUser.password = newPassword;
-		   
+			return true;
 		}
+		return false;
 	}
+
 
 }
 

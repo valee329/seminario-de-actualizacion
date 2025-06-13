@@ -2,10 +2,11 @@ import { LoginApplicationView } from './LoginApplicationView.js';
 
 class Application
 {
-	constructor()
+	constructor(apiInstanceObject, productInstanceObject)
 	{
 		this._api = apiInstanceObject;
-		this._defaultView = new LoginApplicationView(this._api);		
+		this._productAPI = productInstanceObject;
+		this._defaultView = new LoginApplicationView(this._api, this._productAPI);		
 		this._maxLoginFailedAttempts = this._api.getMaxLoginAttempts();
 		this._attempts = 0;
 		this._api_return = null;
@@ -31,11 +32,10 @@ class Application
 		if(this._api_return.status === true) 
 		{
 			const username = this._defaultView.getLastUsername();
-			this.accessMenu(username);
+			this._defaultView.GUI_menu( username);
 		}
 	}
 
-		
 
 }
 
