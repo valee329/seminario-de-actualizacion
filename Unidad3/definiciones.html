@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+    <body>
+
+    </body>
+    <script>
+        class NameElementX extends HTMLElement
+        {
+            constructor()
+            {
+                super();
+            }
+
+            connectedCallback()
+            {
+                //se va a ejecutar siempre cuando el elemento es insertado en el DOM (arbol de elementos)
+            }
+
+            disconnectedCallback()
+            {
+                 //siempre que se quiten elementos del documento
+            }
+            adoptedCallback()
+            {
+                 // se va a ejecutar siempre qu eel elemento se cambie de documento, mover una instancia de una pestaña a otra
+            }
+
+            static get observableAttrubutes()
+            {
+                //solo para publicar cuales son los atributos que tendria disponible el webcomponent
+                //si es utilizado a traves de codigo HTML 
+                //
+            }
+        }
+
+        customElements.define('x-mielementohtml', NameElementX );
+
+        let ejemplo = new 
+
+
+
+
+
+    </script>
+</html>
