@@ -1,0 +1,9 @@
+Conclusion:
+Luego de emplear la API de WebStorage, utilizando los datos de 
+los usuarios para aplicar LocalStorage  y los datos de los 
+productos para aplicar SessionStorage, pude notar que al utilizar 
+LocalStorage los datos se guardan en el almacenamiento local y al
+utilizar SessionStorage se guardan en el almacenamiento de la 
+sesion. Es decir que los datos solo duran mientras las pestañas 
+del navegador esten abiertas. En cambio con LocalStorage los datos 
+persisten al cerrar y volver a abrir la pestaña.

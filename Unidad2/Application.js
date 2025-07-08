@@ -1,12 +1,13 @@
 import { LoginApplicationView } from './LoginApplicationView.js';
+import { ProductController } from './ProductController.js';
 
 class Application
 {
 	constructor(apiInstanceObject, productInstanceObject)
 	{
 		this._api = apiInstanceObject;
-		this._productAPI = productInstanceObject;
-		this._defaultView = new LoginApplicationView(this._api, this._productAPI);		
+		this._productController = productInstanceObject;
+		this._defaultView = new LoginApplicationView(this._api, this, this._productController);		
 		this._maxLoginFailedAttempts = this._api.getMaxLoginAttempts();
 		this._attempts = 0;
 		this._api_return = null;

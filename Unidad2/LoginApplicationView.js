@@ -1,12 +1,13 @@
 class LoginApplicationView
 {
 	constructor(apiInstanceObject, appInstance, productInstanceObject)
-	{
-		this._api = apiInstanceObject;
-		this._app = appInstance;
-		this._productAPI = productInstanceObject; 
-		this._lastUsername = null;
-	}
+{
+    this._api = apiInstanceObject;
+    this._app = appInstance;
+    this._productController = productInstanceObject;
+    this._lastUsername = null;
+}
+
 
 GUI_mainMenu()
 	{
@@ -80,6 +81,7 @@ GUI_mainMenu()
 				break;
             case '3':    
                 this._app.init();
+				break;
 			default:
 				alert("Opción no válida. Intente de nuevo.");
                 this.GUI_menu();
@@ -186,7 +188,7 @@ GUI_mainMenu()
 	
 	GUI_listProducts() 
 	{
-		const productList = this._productAPI.listProducts();
+		const productList = this._productController.listProducts();
 		if (productList.length === 0) {
 			alert("No se encontraron productos.");
 			return;
@@ -211,14 +213,14 @@ GUI_mainMenu()
 			return;
 		}
 
-		const product = this._productAPI.createProduct(code, name, price, stock);
+		const product = this._productController.createProduct(code, name, price, stock);
 		alert(`Producto "${product.name}" añadido exitosamente.`);
 	}
 
 	GUI_updateProduct() 
 	{
 		const code = prompt("Código del producto a editar:");
-		const product = this._productAPI.listProducts().find(p => p.code === code);
+		const product = this._productController.listProducts().find(p => p.code === code);
 
 		if (!product) {
 			alert("Producto no encontrado.");
@@ -234,21 +236,21 @@ GUI_mainMenu()
 			return;
 		}
 
-		this._productAPI.updateProduct(code, newName, newPrice, newStock);
+		this._productController.updateProduct(code, newName, newPrice, newStock);
 		alert("Producto actualizado.");
 	}
 
 	GUI_deleteProduct()
 	{
 		const code = prompt("Código del producto a eliminar:");
-		const success = this._productAPI.deleteProduct(code);
+		const success = this._productController.deleteProduct(code);
 		alert(success ? "Producto eliminado." : "Producto no encontrado.");
 	}
 
 	GUI_buyProduct() 
 	{
 		const name = prompt("¿Qué producto desea comprar?\nVerifique su nombre correcto en la lista de productos:");
-		const products = this._productAPI.listProducts();
+		const products = this._productController.listProducts();
 		const productFound = products.find(function(p)
 			{return p.name.toLowerCase() === name.toLowerCase()});
 	
@@ -266,7 +268,7 @@ GUI_mainMenu()
 			return;
 		}
 	
-		const success = this._productAPI.buyProduct(name, units);
+		const success = this._productController.buyProduct(name, units);
 	
 		if (success === true) {
 			alert(`Su compra ha sido efectuada correctamente.`);
