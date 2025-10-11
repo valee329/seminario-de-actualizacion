@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        class XMLHttpRequestExample extends HTMLElement{
+        constructor()
+        {
+            super();
+    
+            this.requestBtn= document.createElement('button');
+            this.clearBtn= document.createElement('button');
+            this.outputTextArea = document.createElement('textarea');
+    
+            this.requestBtn.innerText = 'Efectuar peticion';
+            this.clearBtn.innerText = 'Limpiar';
+    
+            this.appendChild(this.requestBtn);
+            this.appendChild(this.clearBtn);
+            this.appendChild(this.outputTextArea);
+        
+        
+           // #lo inserto dentro del web component y luego dentro del body del HTML
+        
+        }
+
+        onClearButtonClick(event)
+        {
+            this.outputTextArea.value = '';
+        }
+    
+        onRequestButtonClick(event)            //#la funcion de el boton lo escribo como metodo de la clase
+        {
+            // peticion al endpoin # aca escribo el codigo de la peticion
+            const xhr = new XMLHttpRequest();          //crea el obj
+    
+            xhr.onload = (event) =>
+            {                                     // onload es una  propiedad que permite ,se dispare el metodo que pase por la  propieda xhr,  para cuando este cargada la aplicacion 
+                if (xhr.readyState === 4 && xhr.status === 200)          // caundo se cargue el resultado de la peticon, si es igual a 4 significa si esta listp para usar el obj
+                {
+                                                                        // el codigo 200 significa resp satisfactoria
+                    this.outputTextArea.value = xhr.responseText;
+                    
+                } 
+                else 
+                {
+                    console.error(xhr.statusText);
+                }
+                setTimeout(() => {this.requestBtn.disabled = false }, 2000);
+            };
+            
+            xhr.onerror = (event) =>
+            {
+                console.error(xhr.statusText);
+                this.requestBtn.disabled = false;
+            };
+    
+            xhr.open("GET", "https://jsonplaceholder.typicode.com/posts/1");        //lo inicializa//endpoint
+            xhr.send();                                        //manda la peticion
+            this.requestBtn.disabled = true;
+        }
+    
+        connectedCallback()                  
+        {
+            this.requestBtn.onclick = this.onRequestButtonClick.bind(this);           //##aca asigno la funcion del aboton al elemento de web component
+            this.clearBtn.onclick = this.onClearButtonClick.bind(this);
+        }
+    
+        disconnectedCallback()
+        {
+            this.requestBtn.onclick = null;
+        }
+    
+    }
+    
+    customElements.define('x-request' , XMLHttpRequestExample);     //#Definimos elemento de WebComponent y 'x-request es el nombre que le puse al elemento , con el que lo voy a llamar'
+    
+    function main()
+        {
+            let test = new  XMLHttpRequestExample();    // #aca instancio webcomponent
+            document.body.appendChild(test);             //  #aca lo agrego al DOM
+        }
+    
+        window.onload = main;
+    </script>
+</body>
+</html>
+
+

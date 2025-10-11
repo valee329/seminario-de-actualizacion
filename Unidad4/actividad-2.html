@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        class FetchAPIExample extends HTMLElement{
+        constructor()
+        {
+            super();
+    
+            this.requestBtn= document.createElement('button');
+            this.clearBtn= document.createElement('button');
+            this.outputTextArea = document.createElement('textarea');
+    
+            this.requestBtn.innerText = 'Efectuar peticion';
+            this.clearBtn.innerText = 'Limpiar';
+    
+            this.appendChild(this.requestBtn);
+            this.appendChild(this.clearBtn);
+            this.appendChild(this.outputTextArea);
+        
+        
+           // #lo inserto dentro del web component y luego dentro del body del HTML
+        
+        }
+
+        onClearButtonClick(event)
+        {
+            this.outputTextArea.value = '';
+        }
+    
+        onRequestButtonClick(event)            //#la funcion de el boton lo escribo como metodo de la clase
+        {
+            fetch('GET' , 'https://jsonplaceholder.typicode.com/posts/1').then(response => response.json()).then(data => console.log(data));    //el retorno es de tipo promesa
+        }
+    
+        cennectedCallback()                  
+        {
+            this.requestBtn.onclick = this.onRequestButtonClick.bind(this);           //##aca asigno la funcion del aboton al elemento de web component
+            this.clearBtn.onclick = this.onClearButtonClick.bind(this);
+            
+        }
+    
+        disconnectedCallback()
+        {
+            this.requestBtn.onclick = null;
+        }
+    
+    }
+    
+    customElements.define('x-request' , FetchAPIExample);     //#Definimos elemento de WebComponent y 'x-request es el nombre que le puse al elemento , con el que lo voy a llamar'
+    
+    function main()
+        {
+            let test = new  FetchAPIExample();    // #aca instancio webcomponent
+            document.body.appendChild(test);             //  #aca lo agrego al DOM
+        }
+    
+        window.onload = main;
+    </script>
+</body>
+</html>
+
+

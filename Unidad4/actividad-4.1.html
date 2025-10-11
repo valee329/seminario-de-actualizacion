@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Component Usuarios W3.CSS</title>
+    
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body>
+    <x-user-data></x-user-data>
+    
+    <script>
+        // 1. Definición de los encabezados alternativos en el orden solicitado
+        const TABLE_HEADERS = [
+            { key: 'id', text: 'ID' },
+            { key: 'username', text: 'Usuario' },
+            { key: 'name', text: 'Nombre' },
+            { key: 'email', text: 'Correo' },
+            { key: 'website', text: 'Web' },
+            { key: 'phone', text: 'Celular' }
+        ];
+
+        class FetchUserComponent extends HTMLElement {
+            constructor() {
+                super();
+                
+                this.requestBtn = document.createElement('button');
+                this.clearBtn = document.createElement('button');
+                this.tableContainer = document.createElement('div');
+        
+                this.requestBtn.innerText = 'Efectuar solicitud de Usuarios';
+                this.clearBtn.innerText = 'Limpiar';
+                
+                // Aplicamos estilos W3.CSS a los botones
+                this.requestBtn.className = 'w3-button w3-blue w3-round w3-margin-right';
+                this.clearBtn.className = 'w3-button w3-red w3-round';
+
+                this.appendChild(this.requestBtn);
+                this.appendChild(this.clearBtn);
+                this.appendChild(document.createElement('br'));
+                this.appendChild(this.tableContainer);
+            }
+
+            onClearButtonClick(event) {
+                this.tableContainer.innerHTML = '';
+            }
+
+            // MODIFICACIÓN CLAVE: Genera la tabla con los estilos y filtros de W3.CSS
+            renderTable(data) {
+                this.tableContainer.innerHTML = ''; 
+                
+                // 2. Creación de la tabla con estilos W3.CSS
+                const table = document.createElement('table'); 
+                table.className = 'w3-table w3-striped w3-bordered w3-card-4 w3-hoverable'; // Estilos: rayada, bordeada, card, hover
+                
+                const thead = table.createTHead();
+                const tbody = table.createTBody();
+
+                // 3. Encabezados de la tabla (usando los nombres y orden alternativos)
+                const headerRow = thead.insertRow();
+                headerRow.className = 'w3-light-green'; // Color para la fila del encabezado
+                
+                TABLE_HEADERS.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header.text;
+                    headerRow.appendChild(th);
+                });
+
+                // 4. Cuerpo de la tabla (filtrando los datos y aplicando el estilo "tag" al email)
+                data.forEach(item => {
+                    const row = tbody.insertRow();
+                    
+                    TABLE_HEADERS.forEach(headerDef => {
+                        const cell = row.insertCell();
+                        const key = headerDef.key;
+                        let value = item[key];
+                        
+                        if (key === 'email') {
+                            // 5. Aplicar estilo "tag" al correo electrónico
+                            const emailTag = document.createElement('span');
+                            emailTag.className = 'w3-tag w3-round w3-pale-blue w3-border w3-border-blue';
+                            emailTag.textContent = value;
+                            cell.appendChild(emailTag);
+                        } else if (key === 'phone') {
+                            // Limpiar un poco el teléfono que suele tener extensiones
+                            cell.textContent = value.split(' ')[0].split('x')[0]; 
+                        } else if (key === 'website') {
+                            // Mostrar la URL como un enlace (opcional, pero buena práctica)
+                            const link = document.createElement('a');
+                            link.href = `http://${value}`;
+                            link.target = '_blank';
+                            link.textContent = value;
+                            cell.appendChild(link);
+                        } else {
+                            cell.textContent = value;
+                        }
+                    });
+                });
+
+                this.tableContainer.appendChild(table);
+            }
+        
+            async onRequestButtonClick(event) {
+                try {
+                    // 6. Nuevo Endpoint: /users
+                    const response = await fetch('https://jsonplaceholder.typicode.com/users'); 
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    this.renderTable(data);
+                    
+                } catch (error) {
+                    console.error("Error al obtener o procesar los datos:", error);
+                    this.tableContainer.textContent = `Error en la solicitud: ${error.message}`;
+                }
+            }
+        
+            connectedCallback() {
+                this.requestBtn.onclick = this.onRequestButtonClick.bind(this);
+                this.clearBtn.onclick = this.onClearButtonClick.bind(this);
+            }
+        
+            disconnectedCallback() {
+                this.requestBtn.onclick = null;
+                this.clearBtn.onclick = null;
+            }
+        }
+        
+        // El nombre del Web Component ahora refleja los datos que maneja
+        customElements.define('x-user-data', FetchUserComponent);
+        
+        // La función main ya no es necesaria, eliminada para simplificar.
+    </script>
+</body>
+</html>

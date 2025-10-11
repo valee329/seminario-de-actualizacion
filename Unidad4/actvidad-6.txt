@@ -1,0 +1,272 @@
+-Se puede decir que se aplican los principios: Single Responsability y Open/Closed
+ya que hay clases principales commo FetchAPIExample o XMLHttpRequestExample las 
+que  se encargan de gestionar la interfaz y estan abiertas a la extension y 
+cerrada a la modificación. En cambio no se aplica el principio Dependency 
+Inversion porque la clase de FetchAPIExample (alto nivel) depende de la 
+implementación de la API de fetch y las URL hardcodeadas. 
+Si el servicio de datos cambia, la clase debe modificarse.
+
+-Refactory:
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Component SOLID Refactoring</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    
+    <script>
+        // ===============================================
+        // MODULO DE ABSTRACCION Y BAJO NIVEL (DIP/SRP)
+        // ===============================================
+
+        // 1. Abstracción (No se usa 'interface' en JS puro, se simula con un contrato)
+        // IDataService: Contrato que garantiza que cualquier servicio tendrá estos métodos.
+        
+        class UserService { // Módulo de bajo nivel (Implementación concreta)
+            constructor(baseUrl) {
+                this.baseUrl = baseUrl;
+            }
+
+            async fetchAll() {
+                const response = await fetch(`${this.baseUrl}/users/`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json();
+            }
+
+            async fetchById(userId) {
+                const response = await fetch(`${this.baseUrl}/users/${userId}`);
+                if (!response.ok) throw new Error(`Error ${response.status} al obtener detalles.`);
+                return response.json();
+            }
+        }
+
+        // ===============================================
+        // MODULO DE EXTENSIBILIDAD (OCP)
+        // ===============================================
+
+        // 2. Función de Renderizado de Celdas (Abierto a Extensión/Cerrado a Modificación)
+        // Permite añadir nuevos formatos de celda sin cambiar renderTable.
+        const CellRenderer = {
+            'email': (cell, value) => {
+                const emailTag = document.createElement('span');
+                emailTag.className = 'w3-tag w3-round w3-pale-green w3-border w3-border-green';
+                emailTag.textContent = value;
+                cell.appendChild(emailTag);
+            },
+            // Se pueden agregar más renderizadores aquí (ej: 'website', 'phone')
+            'default': (cell, value) => {
+                cell.textContent = value;
+            }
+        };
+
+
+        const TABLE_HEADERS = [
+            { key: 'id', text: 'ID' },
+            { key: 'username', text: 'Usuario' },
+            { key: 'name', text: 'Nombre' },
+            { key: 'email', text: 'Correo' },
+            { key: 'website', text: 'Web' },
+            { key: 'phone', text: 'Celular' }
+        ];
+
+        // ===============================================
+        // MODULO DE ALTO NIVEL (Web Component)
+        // ===============================================
+
+        class FetchAPIExample extends HTMLElement{
+            
+            // 3. INYECCIÓN DE DEPENDENCIAS (DIP): Recibe el servicio en el constructor
+            constructor(userService) {
+                super();
+                
+                // Si el servicio no se inyecta, usamos el por defecto.
+                this.userService = userService || new UserService('https://jsonplaceholder.typicode.com');
+
+                this.requestBtn= document.createElement('button');
+                this.clearBtn= document.createElement('button');
+                this.tableContainer = document.createElement('div');
+                
+                // Aplicamos estilos W3.CSS
+                this.requestBtn.className = 'w3-button w3-dark-green w3-round w3-margin-right';
+                this.clearBtn.className = 'w3-button w3-red w3-round';
+                this.requestBtn.innerText = 'Efectuar petición';
+                this.clearBtn.innerText = 'Limpiar';
+
+                this.appendChild(this.requestBtn);
+                this.appendChild(this.clearBtn);
+                this.appendChild(document.createElement('br'));
+                this.appendChild(this.tableContainer);
+                
+                // Estructura del Modal (Se mantiene la misma lógica SRP)
+                this.modal = document.createElement('div');
+                this.modal.id = 'userDetailsModal';
+                this.modal.className = 'w3-modal';
+                this.modalContent = document.createElement('div');
+                this.modalContent.className = 'w3-modal-content w3-card-4 w3-animate-top';
+                this.modalHeader = document.createElement('header');
+                this.modalHeader.className = 'w3-container w3-dark-green';
+                this.modalHeader.innerHTML = '<span onclick="document.getElementById(\'userDetailsModal\').style.display=\'none\'" class="w3-button w3-display-topright">&times;</span><h2>Detalles del Usuario</h2>';
+                this.modalBody = document.createElement('div');
+                this.modalBody.className = 'w3-container';
+                this.modalBody.innerHTML = '<p class="w3-center">Cargando detalles...</p>'; // Contenido de carga inicial
+                
+                this.modalContent.appendChild(this.modalHeader);
+                this.modalContent.appendChild(this.modalBody);
+                this.modal.appendChild(this.modalContent);
+                document.body.appendChild(this.modal);
+            }
+
+            onClearButtonClick(event) {
+                this.tableContainer.innerHTML = '';
+            }
+
+            async showUserDetails(userId) {
+                this.modalBody.innerHTML = '<p class="w3-center">Cargando detalles del usuario ' + userId + '...</p>';
+                this.modal.style.display = 'block';
+
+                try {
+                    // USO DE LA DEPENDENCIA INYECTADA (DIP)
+                    const user = await this.userService.fetchById(userId);
+            
+                    const address = user.address;
+                    const company = user.company;
+                    
+                    this.modalHeader.querySelector('h2').textContent = `Detalles de ${user.name}`;
+                    this.modalBody.innerHTML = `
+                        <h4>Información de la Compañía:</h4>
+                        <p><strong>Nombre:</strong> ${company.name}</p>
+                        <p><strong>Catchphrase:</strong> ${company.catchPhrase}</p>
+                        <p><strong>BS:</strong> ${company.bs}</p>
+                        <hr>
+                        <h4>Información de Dirección:</h4>
+                        <p><strong>Calle:</strong> ${address.street}</p>
+                        <p><strong>Suite:</strong> ${address.suite}</p>
+                        <p><strong>Ciudad:</strong> ${address.city}</p>
+                        <p><strong>Código Postal:</strong> ${address.zipcode}</p>
+                        <p><strong>Geo (Lat/Lng):</strong> ${address.geo.lat} / ${address.geo.lng}</p>
+                    `;
+
+                } catch (error) {
+                    this.modalBody.innerHTML = `<p class="w3-text-red w3-center">Error: ${error.message}</p>`;
+                    console.error("Error en showUserDetails:", error);
+                }
+            }
+
+
+            renderTable(data) {
+                this.tableContainer.innerHTML = ''; 
+                const table = document.createElement('table'); 
+                table.className = 'w3-table w3-striped w3-bordered w3-card-4 w3-hoverable';
+
+                const thead = table.createTHead();
+                const tbody = table.createTBody();
+
+                const headerRow = thead.insertRow();
+                headerRow.className = 'w3-dark-green w3-text-white';
+                
+                TABLE_HEADERS.forEach(header => {
+                    const th = document.createElement('th');
+                    th.textContent = header.text;
+                    headerRow.appendChild(th);
+                });
+
+                data.forEach(item => {
+                    const row = tbody.insertRow();
+                    row.style.cursor = 'pointer'; 
+                    row.onclick = () => this.showUserDetails(item.id);
+                    
+                    TABLE_HEADERS.forEach(headerDef => {
+                        const cell = row.insertCell();
+                        const key = headerDef.key;
+                        let value = item[key];
+                        
+                        // USO DEL RENDERIZADOR (OCP): El código de renderTable no cambia
+                        // aunque se agreguen nuevos tipos de formato.
+                        const render = CellRenderer[key] || CellRenderer['default'];
+                        render(cell, value);
+                    });
+                });
+
+                this.tableContainer.appendChild(table);
+            }
+        
+            async onRequestButtonClick(event) {
+                try {
+                    this.tableContainer.innerHTML = '<p class="w3-center w3-text-dark-gray">Cargando datos de usuarios...</p>';
+                    
+                    // USO DE LA DEPENDENCIA INYECTADA (DIP)
+                    const data = await this.userService.fetchAll();
+                    
+                    this.renderTable(data); 
+
+                } catch (error) {
+                    console.error("Error al obtener los datos:", error);
+                    this.tableContainer.textContent = `Error: ${error.message}`;
+                }
+            }
+
+            connectedCallback() {
+                this.requestBtn.onclick = this.onRequestButtonClick.bind(this);
+                this.clearBtn.onclick = this.onClearButtonClick.bind(this);
+            }
+        
+            disconnectedCallback() {
+                this.requestBtn.onclick = null;
+                this.clearBtn.onclick = null;
+            }
+        }
+        
+        // 4. Se corrige la inicialización del Web Component.
+        // Se usa la forma de inicialización sin argumentos si se llama desde HTML.
+        customElements.define('x-request' , FetchAPIExample); 
+        
+        function main() {
+            let test = new FetchAPIExample(); 
+            document.body.appendChild(test); 
+        }
+        
+        window.onload = main;
+    </script>
+</body>
+</html>
+
+Explicación de la Aplicación de los Principios
+
+*Dependency Inversion Principle (DIP):
+
+Se creó la clase de bajo nivel UserService que contiene la lógica de fetch.
+
+La clase de alto nivel FetchAPIExample ahora usa this.userService.fetchAll() 
+en lugar de llamar a fetch directamente. Esto significa que ambos módulos 
+dependen de una abstracción (el "contrato" de la clase UserService), y la 
+dependencia ha sido invertida. Si mañana quieres usar Axios o una base de datos 
+local, solo modificas UserService, no FetchAPIExample.
+
+*Open/Closed Principle (OCP):
+
+La lógica de formateo de celda se extrajo a un objeto CellRenderer.
+
+El método renderTable ahora usa un dispatcher: 
+const render = CellRenderer[key] || CellRenderer['default']; render(cell, value);.
+
+Abierto a Extensión: Para agregar un nuevo formato para el campo phone, solo 
+tienes que extender el objeto CellRenderer añadiendo una nueva función, sin 
+modificar (cerrado) el código de renderTable.
+
+*Single Responsibility Principle (SRP):
+
+Se reforzó al mover la Responsabilidad de Acceso a Datos a la nueva clase 
+UserService.
+
+FetchAPIExample se enfoca en la Responsabilidad de la Vista y Control de Eventos.
