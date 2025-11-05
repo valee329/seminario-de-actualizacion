@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contacto - WebComponent</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+</head>
+<body class="w3-padding">
+
+  <h2 class="w3-center">Ejemplo WebComponent - Contacto</h2>
+  <div class="w3-center">
+    <button id="btnContactar" class="w3-button w3-blue">Contáctenos</button>
+  </div>
+
+  <!-- modal componente con el form como hijo -->
+  <wc-modal-dialog id="modalContacto" title="Formulario de Contacto">
+    <wc-contact-form></wc-contact-form>
+  </wc-modal-dialog>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>

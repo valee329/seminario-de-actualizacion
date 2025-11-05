@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modal con WebComponent</title>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
+</head>
+<body class="w3-container">
+
+  <h2>Ejemplo de WCModalDialog</h2>
+  <button id="btnAbrir" class="w3-button w3-black">Abrir Modal</button>
+
+  <!-- Nuestro componente -->
+  <wc-modal-dialog id="miModal">
+    <h3>Hola desde el modal</h3>
+    <p>Este es un diálogo modal implementado como WebComponent.</p>
+  </wc-modal-dialog>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
