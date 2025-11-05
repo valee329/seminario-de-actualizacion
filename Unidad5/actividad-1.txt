@@ -1,0 +1,380 @@
+Endpoint: /IUserService/GetAllUsers
+Metodo HTTP: GET
+Formato de serializacion:JSON
+Cabecera de entrada: -
+Cabecera de salida: -
+Estructura de datos IN: -
+Estructura de datos OUT:-
+[
+{
+	"users":
+	{"id": "example",
+	 "name": "example",
+	 "email": "example@example.com"
+	}
+Estrucrura de error:
+{"type": error,
+ "descripcion": User not foud
+]
+
+Endpoint: /IUserService/GetUserById
+Metodo HTTP: GET
+Formato de serializacion:JSON
+Cabecera de entrada: -
+Cabecera de salida: -
+Estructura de datos IN: -
+Estructura de datos OUT:
+[
+{
+	"users":
+	{"id": "example",
+	 "name": "example",
+	 "email": "example@example.com"
+	}
+Estrucrura de error:
+{"type": error,
+ "descripcion": User not foud
+]
+
+
+Endpoint: /IUserService/CreateUser
+Metodo HTTP: GET
+Formato de serializacion:JSON
+Cabecera de entrada: -
+Cabecera de salida: -
+Estructura de datos IN: -
+Estructura de datos OUT:
+[
+{
+	"users":
+	{"id": "example",
+	 "name": "example",
+	 "email": "example@example.com"
+	}
+Estrucrura de error:
+{"type": error,
+ "descripcion": User not foud
+]
+
+
+Endpoint: /IUserService/UpdateUser
+Metodo HTTP: PUT
+Formato de serializacion:JSON
+Cabecera de entrada: -
+Cabecera de salida: -
+Estructura de datos IN: -
+Estructura de datos OUT:
+[
+{
+	"users":
+	{"id": "example",
+	 "name": "example",
+	 "email": "example@example.com"
+	}
+Estrucrura de error:
+{"type": error,
+ "descripcion": User not foud
+]
+
+
+Endpoint: /IUserService/DeleteUser
+Metodo HTTP: DELETE
+Formato de serializacion:JSON
+Cabecera de entrada: -
+Cabecera de salida: -
+Estructura de datos IN: -
+Estructura de datos OUT:
+[
+{
+{
+  "success": true
+}
+Estrucrura de error:
+{"type": error,
+ "descripcion": User not foud
+]
+
+
+Endpoint: "IProductCatalog/SearchProducts"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "id" : 7
+}
+Estructura de datos OUT:
+{
+     "id":7
+     "name": "none",
+     "price": "5.000.000"
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "User not found"
+}
+
+
+Endpoint: "IProductCatalog/GetProductById"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "id" : 7
+}
+Estructura de datos OUT:
+{
+     "id":7
+     "name": "none",
+     "price": "5.000.000"
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "User not found"
+}
+
+
+Endpoint: "IProductCatalog/UpdateProductStock"
+Método HTTP: PUT
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "id" : 7
+    "stock":0
+}
+Estructura de datos OUT:
+{
+     "success":true
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "Stock update failed"
+}
+
+
+Endpoint: "IAnalyticService/TrackEvent"
+Método HTTP: POST
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "eventName" : login
+    "properties": {
+"user":example
+"time": 4-11-25 22:17
+}
+Estructura de datos OUT:
+{
+     "status" : evento tracked
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "Failed to record event"
+}
+
+
+Endpoint: "IAnalyticService/GetEventCount"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "eventName" : login
+    
+}
+Estructura de datos OUT:
+{
+     "eventName" : login
+     "count" : 123
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "Event not found"
+}
+
+
+Endpoint: "IAnalyticService/GetTopEvents"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "limit" : 3
+}
+Estructura de datos OUT:
+{
+     "topEvents": {
+    "LoginSuccess": 153,
+    "Purchase": 42,
+    "Logout": 38
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "Failed to record event"
+}
+
+
+Endpoint: "IFileStorage/ListFiles"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "directory":/document
+}
+Estructura de datos OUT:
+{
+     ["file1.txt", "file2.docx", "image.png"]
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "File not found"
+}
+
+
+Endpoint: "IFileStorage/ReadFiles"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "path":/document/info.txt
+}
+Estructura de datos OUT:
+{
+     ["content : content of directory"]
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "peermission denied exception"
+}
+
+
+Endpoint: "IFileStorage/WriteFile"
+Método HTTP: POST
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "path":/document/new.txt
+     "content" : content new
+}
+Estructura de datos OUT:
+{
+     "success" : true
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "peermission denied exception"
+}
+
+Endpoint: "IFileStorage/DeleteFile"
+Método HTTP: DELETE
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "path":/document/old.txt
+     
+}
+Estructura de datos OUT:
+{
+     "success" : true
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "peermission denied exception"
+}
+
+Endpoint: "IAuthService/Login"
+Método HTTP: POST
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "user": "admin",
+  "password": "1234"
+}
+Estructura de datos OUT:
+{
+     "token": "abc123xyz"
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    "description": "invalid credence"
+}
+
+			
+Endpoint: "IAuthService/Logout"
+Método HTTP: POST
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "token": "abc123xyz"
+
+}
+Estructura de datos OUT:
+{
+     "status": logout successful
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+    
+}
+
+			
+Endpoint: "IAuthService/ValidateToken"
+Método HTTP: GET
+Formato Serializacion: JSON
+Cabecera entrada: -
+Cabecera salida: -
+Estructura de datos IN:
+{
+    "token": "abc123xyz"
+
+}
+Estructura de datos OUT:
+{
+     "valid" : true
+}
+Estructura de datos ERR:
+{
+    "type": "error"
+   
+}
+
+
+
+
+			
+
+
+
+						
